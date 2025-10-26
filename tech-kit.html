@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech-Kit Inventory Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { padding: 20px; }
+        .navbar-brand { font-weight: bold; }
+        .table { margin-top: 20px; }
+        .summary-card { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img src="https://www.proxymity.io/hubfs/Proxymity%20Logo%20-%20RGB%20-%20Blue-Purple.png" alt="Proxymity Logo" style="height: 30px; margin-right: 10px;">Tech-Kit</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard" data-page="dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#records" data-page="records">Records</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reports" data-page="reports">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#logs" data-page="logs">Logs</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="dashboard" class="page">
+            <h2>Dashboard</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Records</h5>
+                            <p class="card-text" id="total-records">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Live Status</h5>
+                            <p class="card-text" id="live-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Off Inventory</h5>
+                            <p class="card-text" id="off-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Headsets</h5>
+                            <p class="card-text" id="headset-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Monitors</h5>
+                            <p class="card-text" id="monitor-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Keyboards</h5>
+                            <p class="card-text" id="keyboard-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Mice</h5>
+                            <p class="card-text" id="mouse-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Chargers</h5>
+                            <p class="card-text" id="charger-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Dock Stations</h5>
+                            <p class="card-text" id="dock-count">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <canvas id="teamChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="locationChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="records" class="page d-none">
+            <h2>Records</h2>
+            <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#recordModal" onclick="openAddModal()">Add Record</button>
+            <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search by Name...">
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <label>Headset</label>
+                    <select id="filterHeadset" class="form-select">
+                        <option value="any">Any</option>
+                        <option value="has">Has (1+)</option>
+                        <option value="none">None (0)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Monitors</label>
+                    <select id="filterMonitors" class="form-select">
+                        <option value="any">Any</option>
+                        <option value="has">Has (1+)</option>
+                        <option value="none">None (0)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Keyboard</label>
+                    <select id="filterKeyboard" class="form-select">
+                        <option value="any">Any</option>
+                        <option value="has">Has (1+)</option>
+                        <option value="none">None (0)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Mouse</label>
+                    <select id="filterMouse" class="form-select">
+                        <option value="any">Any</option>
+                        <option value="has">Has (1+)</option>
+                        <option value="none">None (0)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Charger</label>
+                    <select id="filterCharger" class="form-select">
+                        <option value="any">Any</option>
+                        <option value="has">Has (1+)</option>
+                        <option value="none">None (0)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Dock Station</label>
+                    <select id="filterDock" class="form-select">
+                        <option value="any">Any</option>
+                        <option value="has">Has (1+)</option>
+                        <option value="none">None (0)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label>Other items contain</label>
+                    <input type="text" id="filterOther" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label>Filter by Location</label>
+                    <select id="filterLocation" class="form-select">
+                        <option value="">All</option>
+                    </select>
+                </div>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Names</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Team</th>
+                        <th>Organization</th>
+                        <th>Location</th>
+                        <th>Headset</th>
+                        <th>Monitors</th>
+                        <th>Keyboard</th>
+                        <th>Mouse</th>
+                        <th>Charger</th>
+                        <th>Dock Station</th>
+                        <th>Other items</th>
+                        <th>Provided Date</th>
+                        <th>Leaver Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTable"></tbody>
+            </table>
+            <p id="recordCount"></p>
+            <button class="btn btn-success" onclick="exportToCSV()">Export to CSV</button>
+        </div>
+
+        <div id="reports" class="page d-none">
+            <h2>Reports</h2>
+            <div class="mb-3">
+                <label>Filter by Status:</label>
+                <select id="filterStatus" class="form-select" onchange="renderReports()">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label>Filter by Team:</label>
+                <select id="filterTeam" class="form-select" onchange="renderReports()">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Names</th>
+                        <th>Status</th>
+                        <th>Team</th>
+                        <th>Location</th>
+                        <th>Headset</th>
+                        <th>Monitors</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTable"></tbody>
+            </table>
+            <p id="reportCount"></p>
+        </div>
+
+        <div id="logs" class="page d-none">
+            <h2>Activity Logs</h2>
+            <ul id="logsList" class="list-group"></ul>
+            <button class="btn btn-danger mt-3" onclick="clearLogs()">Clear Logs</button>
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit -->
+    <div class="modal fade" id="recordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recordForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label>Names</label>
+                                    <input type="text" class="form-control" name="Names" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" name="Email">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Status</label>
+                                    <select class="form-select" name="Status" required></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Team</label>
+                                    <select class="form-select" name="Team" required></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Organization</label>
+                                    <select class="form-select" name="Organization" required></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Location</label>
+                                    <select class="form-select" name="Location" required></select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label>Headset</label>
+                                    <input type="number" class="form-control" name="headset" min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Monitors</label>
+                                    <input type="number" class="form-control" name="Monitors" min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Keyboard</label>
+                                    <input type="number" class="form-control" name="Keyboard" min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Mouse</label>
+                                    <input type="number" class="form-control" name="mouse" min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Charger</label>
+                                    <input type="number" class="form-control" name="Charger" min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Dock Station</label>
+                                    <input type="number" class="form-control" name="Dock Station" min="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Other items</label>
+                                    <input type="text" class="form-control" name="Other items">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Provided Date</label>
+                                    <input type="date" class="form-control" name="Provided Date">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Leaver Date</label>
+                                    <input type="date" class="form-control" name="Leaver Date">
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="id">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveRecord()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const initialData = {
+            records: [{"Names":"Nicole Bethell","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Angela Bird","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Rach Whitehurst","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Thomas Watson","Email":"","Status":"Live","Team":"UAT","Organization":"Proxymity","Location":"London","headset":"","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Netra Phatak","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45691","Leaver Date":""},{"Names":"Karthikaa Rajkumar","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Omar Nousseir","Email":"","Status":"Live","Team":"Data","Organization":"Proxymity","Location":"London","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"Ergonomic Chair","Provided Date":"","Leaver Date":""},{"Names":"Sophie Adamson","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Alam, Rehana","Email":"","Status":"Live","Team":"IT","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Alty, Nicola","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Ashraf-Cheema, Ismael","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Ben Amram, Omer","Email":"","Status":"Live","Team":"Devops","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Blank, Zeev","Email":"","Status":"Working on it","Team":"Devops","Organization":"Proxymity","Location":"Telaviv","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Blecher, Maya","Email":"","Status":"Live","Team":"HR","Organization":"Proxymity","Location":"London","headset":"","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Butcher, Ollie","Email":"","Status":"Live","Team":"Sales","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Ciobanu, Maria","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Das, Madhuchhanda","Email":"","Status":"Live","Team":"Sales","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Gall, Szabolcs","Email":"","Status":"Live","Team":"Legal","Organization":"Proxymity","Location":"London","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Gonda, Uri","Email":"","Status":"Live","Team":"Sales","Organization":"Proxymity","Location":"London","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Hayat, Usama","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Jadhav, Shubhangi","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Kandola, Pooja","Email":"","Status":"Live","Team":"Legal","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Karmoun, Firdaws","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Kayembe, Job","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Kempe, Michael","Email":"","Status":"Live","Team":"Management","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Khan, Safran","Email":"","Status":"Live","Team":"IT","Organization":"Proxymity","Location":"London","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Kim, Sue","Email":"","Status":"Live","Team":"RM","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Likhachyov, Evgeny","Email":"","Status":"Working on it","Team":"Devops","Organization":"Proxymity","Location":"Telaviv","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Little, Dean","Email":"","Status":"Live","Team":"CEO","Organization":"Proxymity","Location":"London","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Little, Nigel","Email":"","Status":"Live","Team":"Product","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Mason, Daniel","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"McGregor, Olga","Email":"","Status":"Live","Team":"Customer Onboarding","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Miah, Abdal","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"0","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Mistry, Akshay","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"0","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"1","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Ophir, Miron","Email":"","Status":"Working on it","Team":"Devops","Organization":"Proxymity","Location":"Telaviv","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Oum, Mey","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Pereira, Steven","Email":"","Status":"Live","Team":"Compliance","Organization":"Proxymity","Location":"London","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Phillips, Alex","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"Laptop stand","Provided Date":"45313","Leaver Date":""},{"Names":"Pylypenko, Anton","Email":"","Status":"Live","Team":"Devops","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Rajkumar, Karthikaa","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Shah, Prerna","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Melbourne","headset":"0","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Somaiya, Niyati","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Stankeviciute, Akvile","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"2","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"1","Other items":"1 docker","Provided Date":"","Leaver Date":""},{"Names":"Tweedale, Corey","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Watson, Thomas","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"0","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Schneiders, Ellie","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"1","Other items":"1 docker","Provided Date":"","Leaver Date":""},{"Names":"Cavanagh, Rosie","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Roger Gulzar","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Harshita Singhania","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45310","Leaver Date":""},{"Names":"Anton Pylypenko","Email":"","Status":"Live","Team":"","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45308","Leaver Date":""},{"Names":"Yuha Hwang","Email":"","Status":"Live","Team":"","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"1","Keyboard":"1","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45308","Leaver Date":""},{"Names":"Daniel Da Costa","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"1","Other items":"Docking station","Provided Date":"","Leaver Date":""},{"Names":"33","Email":"","Status":"Live","Team":"","Organization":"Proxymity","Location":"Manchester","headset":"","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45315","Leaver Date":""},{"Names":"Tara Chow","Email":"","Status":"Live","Team":"Legal","Organization":"Proxymity","Location":"London","headset":"","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"webcam","Provided Date":"","Leaver Date":""},{"Names":"Asimenia Laina","Email":"","Status":"Live","Team":"","Organization":"","Location":"","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Jade McGarret","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"1","Other items":"","Provided Date":"45328","Leaver Date":""},{"Names":"Ahmed bin hadi","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45327","Leaver Date":""},{"Names":"Ricard Scavetta","Email":"","Status":"Live","Team":"RM","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Rachel Akemba","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45352","Leaver Date":""},{"Names":"Arnab C","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Joseph S","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Maximillian Wielebnows","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Liam Folland","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Sanjana Jandhyala","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Ryan Woods","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Becky Sharp","Email":"","Status":"Off Inventory","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"0","Monitors":"0","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":"45772"},{"Names":"Ian Pope","Email":"","Status":"Live","Team":"HR","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"1","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Sijo (Sijo) Thakur","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"2","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45399","Leaver Date":""},{"Names":"Haseeb Ul Haque","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Ayana","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45692","Leaver Date":""},{"Names":"Arianne Michelet","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45450","Leaver Date":""},{"Names":"Gokhan Yavuz","Email":"","Status":"Live","Team":"Product","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45454","Leaver Date":""},{"Names":"Charlotte Knight","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45454","Leaver Date":""},{"Names":"Aaron Holcombe","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Melbourne","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45553","Leaver Date":""},{"Names":"Katie G","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45553","Leaver Date":""},{"Names":"Al Sherlock","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45539","Leaver Date":""},{"Names":"Anuj Shah","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Melbourne","headset":"","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Jaimin Purohit","Email":"","Status":"Live","Team":"Product","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Kavana Desai","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45722","Leaver Date":""},{"Names":"Michele Thomas","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"New York","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45735","Leaver Date":""},{"Names":"Michael Noah","Email":"","Status":"Live","Team":"IT","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"1","Dock Station":"1","Other items":"","Provided Date":"45875","Leaver Date":""},{"Names":"Alexander Gardiner","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"1","Dock Station":"","Other items":"","Provided Date":"45736","Leaver Date":""},{"Names":"Kate Charlton","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45735","Leaver Date":""},{"Names":"Angad Siddharth","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45735","Leaver Date":""},{"Names":"Manideep Thonupunoori","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"45735","Leaver Date":""},{"Names":"Mariam Abaid","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Shakira Begum","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"1","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Claud Hutley","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Saad Khan","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"1","Other items":"","Provided Date":"45741","Leaver Date":""},{"Names":"Sheldon Fonseca","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Aann Koyvila Varghese","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"1","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Nicholas Ansari","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Jessica Tamara","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Konda Sirigiri","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Adam Hemmings","Email":"","Status":"Live","Team":"Product","Organization":"Proxymity","Location":"London","headset":"1","Monitors":"2","Keyboard":"","mouse":"","Charger":"","Dock Station":"1","Other items":"webcam","Provided Date":"45755","Leaver Date":""},{"Names":"Flo Harrison","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Afolabi Daramola","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"2","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Reece Gannon","Email":"","Status":"Live","Team":"Product","Organization":"Proxymity","Location":"Manchester","headset":"","Monitors":"0","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Mumin Eltahir","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Malaysia","headset":"","Monitors":"1","Keyboard":"","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Olu Olatunji","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Jack Foreman","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"1","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Thuruvanraj S","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Malaysia","headset":"","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45818","Leaver Date":""},{"Names":"Faiq Jalal","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Malaysia","headset":"1","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Linges Padmanabhan","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Malaysia","headset":"1","Monitors":"1","Keyboard":"","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Tracy Wong","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Malaysia","headset":"1","Monitors":"1","Keyboard":"","mouse":"1","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Eoin Hyland","Email":"","Status":"Live","Team":"Finance","Organization":"Proxymity","Location":"London","headset":"","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"1","Dock Station":"1","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Christina Tai","Email":"","Status":"Live","Team":"Product","Organization":"Proxymity","Location":"New York","headset":"1","Monitors":"","Keyboard":"1","mouse":"1","Charger":"1","Dock Station":"1","Other items":"Magic Keyboard andf Trackpad","Provided Date":"","Leaver Date":"2025-04-25"},{"Names":"Ahmed Bin Hadi","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Laura FitzGerald","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"1","Charger":"1","Dock Station":"","Other items":"","Provided Date":"45854","Leaver Date":""},{"Names":"Shubhangi Jadhav","Email":"","Status":"Live","Team":"Technology","Organization":"Proxymity","Location":"Manchester","headset":"","Monitors":"1","Keyboard":"1","mouse":"1","Charger":"2","Dock Station":"1","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Usama Hayat","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"","Monitors":"","Keyboard":"","mouse":"","Charger":"1","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"James Redman","Email":"","Status":"Live","Team":"Operations","Organization":"Proxymity","Location":"Manchester","headset":"1","Monitors":"","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"","Leaver Date":""},{"Names":"Virendra","Email":"","Status":"Live","Team":"Data","Organization":"Proxymity","Location":"London","headset":"","Monitors":"1","Keyboard":"","mouse":"","Charger":"","Dock Station":"","Other items":"","Provided Date":"45883","Leaver Date":""}],
+            status_options: ["Live","Off Inventory","Working on it"],
+            team_options: ["CEO","Compliance","Customer Onboarding","Data","Devops","Finance","HR","IT","Legal","Management","Operations","Product","RM","Sales","Technology","UAT"],
+            org_options: ["Proxymity"],
+            loc_options: ["London","Malaysia","Manchester","Melbourne","New York","Telaviv"]
+        };
+
+        let records = [];
+        let logs = [];
+        let options = {
+            status: initialData.status_options,
+            team: initialData.team_options,
+            org: initialData.org_options,
+            loc: initialData.loc_options
+        };
+        let nextId = 1;
+
+        function loadData() {
+            const savedRecords = localStorage.getItem('records');
+            const savedLogs = localStorage.getItem('logs');
+            const savedOptions = localStorage.getItem('options');
+            if (savedRecords) {
+                records = JSON.parse(savedRecords).map((r, index) => ({...r, id: r.id || index + 1}));
+                nextId = Math.max(...records.map(r => r.id)) + 1;
+            } else {
+                records = initialData.records.map((r, index) => ({...r, id: index + 1}));
+                nextId = records.length + 1;
+            }
+            if (savedLogs) {
+                logs = JSON.parse(savedLogs);
+            }
+            if (savedOptions) {
+                options = JSON.parse(savedOptions);
+            } else {
+                localStorage.setItem('options', JSON.stringify(options));
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('records', JSON.stringify(records));
+            localStorage.setItem('logs', JSON.stringify(logs));
+            localStorage.setItem('options', JSON.stringify(options));
+        }
+
+        function addLog(action, details) {
+            logs.push({ timestamp: new Date().toISOString(), action, details });
+            saveData();
+        }
+
+        function renderDashboard() {
+            document.getElementById('total-records').textContent = records.length;
+            document.getElementById('live-count').textContent = records.filter(r => r.Status === 'Live').length;
+            document.getElementById('off-count').textContent = records.filter(r => r.Status === 'Off Inventory').length;
+            document.getElementById('headset-count').textContent = records.reduce((sum, r) => sum + (parseInt(r.headset) || 0), 0);
+            document.getElementById('monitor-count').textContent = records.reduce((sum, r) => sum + (parseInt(r.Monitors) || 0), 0);
+            document.getElementById('keyboard-count').textContent = records.reduce((sum, r) => sum + (parseInt(r.Keyboard) || 0), 0);
+            document.getElementById('mouse-count').textContent = records.reduce((sum, r) => sum + (parseInt(r.mouse) || 0), 0);
+            document.getElementById('charger-count').textContent = records.reduce((sum, r) => sum + (parseInt(r.Charger) || 0), 0);
+            document.getElementById('dock-count').textContent = records.reduce((sum, r) => sum + (parseInt(r['Dock Station']) || 0), 0);
+
+            // Team Chart
+            const teamCounts = records.reduce((acc, r) => {
+                acc[r.Team] = (acc[r.Team] || 0) + 1;
+                return acc;
+            }, {});
+            new Chart(document.getElementById('teamChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(teamCounts),
+                    datasets: [{ data: Object.values(teamCounts), backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff'] }]
+                },
+                options: { title: { display: true, text: 'Teams Distribution' } }
+            });
+
+            // Location Chart
+            const locCounts = records.reduce((acc, r) => {
+                acc[r.Location] = (acc[r.Location] || 0) + 1;
+                return acc;
+            }, {});
+            new Chart(document.getElementById('locationChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(locCounts),
+                    datasets: [{ label: 'Count', data: Object.values(locCounts), backgroundColor: '#36a2eb' }]
+                },
+                options: { title: { display: true, text: 'Locations Distribution' } }
+            });
+        }
+
+        function renderRecords() {
+            const tbody = document.getElementById('recordsTable');
+            tbody.innerHTML = '';
+            let filtered = records;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            if (search) filtered = filtered.filter(r => r.Names.toLowerCase().includes(search));
+            const fHeadset = document.getElementById('filterHeadset').value;
+            if (fHeadset !== 'any') filtered = filtered.filter(r => {
+                const count = parseInt(r.headset) || 0;
+                return fHeadset === 'has' ? count > 0 : count === 0;
+            });
+            const fMonitors = document.getElementById('filterMonitors').value;
+            if (fMonitors !== 'any') filtered = filtered.filter(r => {
+                const count = parseInt(r.Monitors) || 0;
+                return fMonitors === 'has' ? count > 0 : count === 0;
+            });
+            const fKeyboard = document.getElementById('filterKeyboard').value;
+            if (fKeyboard !== 'any') filtered = filtered.filter(r => {
+                const count = parseInt(r.Keyboard) || 0;
+                return fKeyboard === 'has' ? count > 0 : count === 0;
+            });
+            const fMouse = document.getElementById('filterMouse').value;
+            if (fMouse !== 'any') filtered = filtered.filter(r => {
+                const count = parseInt(r.mouse) || 0;
+                return fMouse === 'has' ? count > 0 : count === 0;
+            });
+            const fCharger = document.getElementById('filterCharger').value;
+            if (fCharger !== 'any') filtered = filtered.filter(r => {
+                const count = parseInt(r.Charger) || 0;
+                return fCharger === 'has' ? count > 0 : count === 0;
+            });
+            const fDock = document.getElementById('filterDock').value;
+            if (fDock !== 'any') filtered = filtered.filter(r => {
+                const count = parseInt(r['Dock Station']) || 0;
+                return fDock === 'has' ? count > 0 : count === 0;
+            });
+            const fOther = document.getElementById('filterOther').value.toLowerCase();
+            if (fOther) filtered = filtered.filter(r => (r['Other items'] || '').toLowerCase().includes(fOther));
+            const fLocation = document.getElementById('filterLocation').value;
+            if (fLocation) filtered = filtered.filter(r => r.Location === fLocation);
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${r.Names}</td>
+                    <td>${r.Email}</td>
+                    <td>${r.Status}</td>
+                    <td>${r.Team}</td>
+                    <td>${r.Organization}</td>
+                    <td>${r.Location}</td>
+                    <td>${r.headset}</td>
+                    <td>${r.Monitors}</td>
+                    <td>${r.Keyboard}</td>
+                    <td>${r.mouse}</td>
+                    <td>${r.Charger}</td>
+                    <td>${r['Dock Station']}</td>
+                    <td>${r['Other items']}</td>
+                    <td>${formatDate(r['Provided Date'])}</td>
+                    <td>${formatDate(r['Leaver Date'])}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openEditModal(${r.id})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteRecord(${r.id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('recordCount').textContent = `Showing ${filtered.length} of ${records.length} records`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            if (/^\d+$/.test(dateStr)) {
+                // Excel serial date
+                const utc_days = Math.floor(parseInt(dateStr) - 25569);
+                const utc_value = utc_days * 86400;
+                const date_info = new Date(utc_value * 1000);
+                return date_info.toISOString().split('T')[0];
+            }
+            return dateStr;
+        }
+
+        function populateDropdowns() {
+            const statusSelect = document.querySelector('select[name="Status"]');
+            const teamSelect = document.querySelector('select[name="Team"]');
+            const orgSelect = document.querySelector('select[name="Organization"]');
+            const locSelect = document.querySelector('select[name="Location"]');
+
+            statusSelect.innerHTML = options.status.map(opt => `<option>${opt}</option>`).join('');
+            teamSelect.innerHTML = options.team.map(opt => `<option>${opt}</option>`).join('');
+            orgSelect.innerHTML = options.org.map(opt => `<option>${opt}</option>`).join('');
+            locSelect.innerHTML = options.loc.map(opt => `<option>${opt}</option>`).join('');
+
+            const filterStatus = document.getElementById('filterStatus');
+            const filterTeam = document.getElementById('filterTeam');
+            filterStatus.innerHTML = '<option value="">All</option>' + options.status.map(opt => `<option>${opt}</option>`).join('');
+            filterTeam.innerHTML = '<option value="">All</option>' + options.team.map(opt => `<option>${opt}</option>`).join('');
+
+            const filterLocation = document.getElementById('filterLocation');
+            filterLocation.innerHTML = '<option value="">All</option>' + options.loc.map(opt => `<option>${opt}</option>`).join('');
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add Record';
+            document.getElementById('recordForm').reset();
+            document.querySelector('[name="id"]').value = '';
+        }
+
+        function openEditModal(id) {
+            const record = records.find(r => r.id === id);
+            document.getElementById('modalTitle').textContent = 'Edit Record';
+            const form = document.getElementById('recordForm');
+            Object.keys(record).forEach(key => {
+                if (key !== 'id') {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) input.value = record[key];
+                }
+            });
+            form.querySelector('[name="id"]').value = id;
+            new bootstrap.Modal(document.getElementById('recordModal')).show();
+        }
+
+        function saveRecord() {
+            const form = document.getElementById('recordForm');
+            const data = Object.fromEntries(new FormData(form));
+            const id = parseInt(data.id);
+            delete data.id;
+
+            // Update options if new values
+            if (!options.status.includes(data.Status)) options.status.push(data.Status);
+            if (!options.team.includes(data.Team)) options.team.push(data.Team);
+            if (!options.org.includes(data.Organization)) options.org.push(data.Organization);
+            if (!options.loc.includes(data.Location)) options.loc.push(data.Location);
+
+            if (id) {
+                const index = records.findIndex(r => r.id === id);
+                records[index] = { ...records[index], ...data };
+                addLog('Update', `Updated record for ${data.Names}`);
+            } else {
+                records.push({ ...data, id: nextId++ });
+                addLog('Add', `Added record for ${data.Names}`);
+            }
+            saveData();
+            populateDropdowns();
+            renderRecords();
+            bootstrap.Modal.getInstance(document.getElementById('recordModal')).hide();
+        }
+
+        function deleteRecord(id) {
+            if (confirm('Are you sure?')) {
+                const record = records.find(r => r.id === id);
+                records = records.filter(r => r.id !== id);
+                addLog('Delete', `Deleted record for ${record.Names}`);
+                saveData();
+                renderRecords();
+            }
+        }
+
+        function renderReports() {
+            const tbody = document.getElementById('reportsTable');
+            tbody.innerHTML = '';
+            let filtered = records;
+            const filterStatus = document.getElementById('filterStatus').value;
+            if (filterStatus) filtered = filtered.filter(r => r.Status === filterStatus);
+            const filterTeam = document.getElementById('filterTeam').value;
+            if (filterTeam) filtered = filtered.filter(r => r.Team === filterTeam);
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${r.Names}</td>
+                    <td>${r.Status}</td>
+                    <td>${r.Team}</td>
+                    <td>${r.Location}</td>
+                    <td>${r.headset}</td>
+                    <td>${r.Monitors}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('reportCount').textContent = `Showing ${filtered.length} of ${records.length} records`;
+        }
+
+        function renderLogs() {
+            const list = document.getElementById('logsList');
+            list.innerHTML = '';
+            logs.forEach(log => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = `${log.timestamp}: ${log.action} - ${log.details}`;
+                list.appendChild(li);
+            });
+        }
+
+        function clearLogs() {
+            if (confirm('Clear all logs?')) {
+                logs = [];
+                saveData();
+                renderLogs();
+            }
+        }
+
+        function exportToCSV() {
+            const headers = Object.keys(records[0]).filter(k => k !== 'id');
+            const csv = [headers.join(',')] .concat(records.map(r => headers.map(h => `"${r[h] || ''}"`).join(','))).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tech_kit_data.csv';
+            a.click();
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                document.querySelectorAll('.page').forEach(p => p.classList.add('d-none'));
+                document.getElementById(link.dataset.page).classList.remove('d-none');
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                if (link.dataset.page === 'dashboard') renderDashboard();
+                if (link.dataset.page === 'records') renderRecords();
+                if (link.dataset.page === 'reports') renderReports();
+                if (link.dataset.page === 'logs') renderLogs();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', renderRecords);
+        document.getElementById('filterHeadset').addEventListener('change', renderRecords);
+        document.getElementById('filterMonitors').addEventListener('change', renderRecords);
+        document.getElementById('filterKeyboard').addEventListener('change', renderRecords);
+        document.getElementById('filterMouse').addEventListener('change', renderRecords);
+        document.getElementById('filterCharger').addEventListener('change', renderRecords);
+        document.getElementById('filterDock').addEventListener('change', renderRecords);
+        document.getElementById('filterOther').addEventListener('input', renderRecords);
+        document.getElementById('filterLocation').addEventListener('change', renderRecords);
+
+        loadData();
+        populateDropdowns();
+        renderDashboard(); // Default page
+    </script>
+</body>
+</html>
